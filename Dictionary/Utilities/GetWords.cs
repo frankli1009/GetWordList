@@ -4,6 +4,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Dictionary.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 
 namespace Dictionary.Utilities
@@ -52,7 +55,6 @@ namespace Dictionary.Utilities
         private List<string> GetWordsFromDBContext(WordDbContext context, string letters)
         {
             int len = letters.Length;
-            Regex rgx = new Regex(String.Format("^[{0}]{{{1}}}$", letters, len));
             List<string> results = new List<string>();
             List<Tuple<char, int>> letterCount = new List<Tuple<char, int>>();
             foreach (var letter in letters)
@@ -67,30 +69,22 @@ namespace Dictionary.Utilities
                 }
                 letterCount.Add(new Tuple<char, int>(letter, count));
             }
-            foreach (var letter in letters)
+            foreach (var letter in letterCount)
             {
-                var selWords = context.Words.Where(w => w.Length == len && w.StartLetter == letter && rgx.IsMatch(w.WordW));
+                var selWords = context.Words.Where(w => w.Length == len && w.StartLetter == letter.Item1);
                 foreach (var item in letterCount)
                 {
-                    Regex regex = new Regex(CheckLetterCountRegularExpress(item));
-                    selWords = selWords.Where(w => rgx.IsMatch(w.WordW));
+                    string pattern = $"%{item.Item1}";
+                    for (int i = 1; i < item.Item2; i++)
+                    {
+                        pattern += $"%{item.Item1}";
+                    }
+                    pattern += $"%";
+                    selWords = selWords.Where(w => EF.Functions.Like(w.WordW, pattern));
                 }
                 results.AddRange(selWords.Select(s => s.WordW));
             }
             return results.Distinct().ToList();
-        }
-
-        private string CheckLetterCountRegularExpress(Tuple<char, int> item)
-        {
-            string notLetter = $"[^{item.Item1}]*";
-            string onceLetter = $"{notLetter}{item.Item1}";
-            string exp = $"^{onceLetter}";
-            for (int i = 1; i < item.Item2; i++)
-            {
-                exp += onceLetter;
-            }
-            exp += $"{notLetter}$";
-            return exp;
         }
 
         private List<string> GetLettersForWord(string letters, int iWordLength, string pre = "")
