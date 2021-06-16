@@ -84,6 +84,8 @@ namespace WordsStartWithLetter.Tests
                 catch(Exception e)
                 {
                     Console.WriteLine("Failed to find button 'I Accept'.");
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
                 }
                 autoEvent.WaitOne();
                 count++;
