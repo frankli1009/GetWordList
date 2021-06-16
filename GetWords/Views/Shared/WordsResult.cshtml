@@ -1,0 +1,36 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@using GetWords.Utilities
+@{
+    List<string> words = ViewData["WordList"] as List<string>;
+    int curPage = (int)ViewData["CurPage"];
+    string sk = ViewData["SessionKey_WR"] as string;
+    Pagination pagination = new Pagination(words, curPage, Url, sk);
+    List<string> wordsOnCurPage = pagination.WordsOnCurPage;
+    int startNo = pagination.WordNoBegins;
+
+    @pagination.RenderPaination()
+
+    <table class="table table-striped table-hover words-result">
+        <tbody>
+            @for (int i = 0; i < pagination.RowCount; i++)
+            {
+                <tr>
+                    @for (int j = 0; j < pagination.WordCountPerRow; j++)
+                    {
+                        <td>
+                            @if (i * pagination.WordCountPerRow + j < wordsOnCurPage.Count)
+                            {
+                                <span class="text-muted padding-right-5">@(startNo +i * pagination.WordCountPerRow + j)</span>
+                                <span class="text-danger">@wordsOnCurPage[i * pagination.WordCountPerRow + j]</span>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br/>
+    @pagination.RenderPaination()
+}

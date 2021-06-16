@@ -1,0 +1,77 @@
+﻿@model GetWords.Models.WordRequirement
+
+@{
+    ViewData["Title"] = "Home Page";
+    string requestError = ViewData["RequestError"] as string;
+    List<string> words = ViewData["WordList"] as List<string>;
+    bool noResult = true;
+    if (!(requestError == null && words == null))
+    {
+        noResult = false;
+        if (words == null)
+        {
+            words = new List<string>();
+        }
+    }
+}
+
+<div class="text-center">
+    <h1 class="display-4">Get Words</h1>
+    <div class="row">
+        <div class="col-md-6 padding-bottom-30">
+            @using (Html.BeginForm())
+            {
+                <h3>Letters Available</h3>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Letters</span>
+                    </div>
+                    @Html.TextBoxFor(x => x.Letters, null, new { @class="form-control", aria_describedby = "basic-addon1" })
+                </div>
+
+                <h3>Conditions To Match</h3>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon2">Length</span>
+                    </div>
+                    @Html.TextBoxFor(x => x.Length, null, new { @class="form-control", aria_describedby = "basic-addon2" })
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">Extra RegEx</span>
+                    </div>
+                    @Html.TextBoxFor(x => x.ExtraRegEx, null, new { @class = "form-control", aria_describedby = "basic-addon3" })
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Rejected Words</span>
+                    </div>
+                    @Html.TextAreaFor(x => x.Rejects, 6, 1, new { @class = "form-control", aria_label = "Rejected Words" })
+                </div>
+
+                <div class="mb-3">
+                    <input class="btn btn-primary" type="submit" value="Proceed" />
+                </div>
+            }
+        </div>
+        <div class="col-md-6 padding-bottom-30">
+            @if (!noResult)
+            {
+                <h3>Words List</h3>
+                if (words.Any())
+                {
+                    <p>There are total @(words.Count) words found.</p>
+                    <div id="wordsresult">
+                        @await Html.PartialAsync("WordsResult", viewData: ViewData)
+                    </div>
+                }
+                else
+                {
+                    <p>@requestError</p>
+                    <p>*** GOT NOTHING ***</p>
+                }
+            }
+        </div>
+    </div>
+</div>
+
