@@ -15,5 +15,17 @@ namespace Dictionary.Models
         public List<string> NotFounds { get; set; }
         public List<Word> Conflicts { get; set; }
         public List<Word> Oks { get; set; }
+
+        public OperationResult Append(OperationResult or)
+        {
+            if (or != null)
+            {
+                this.NotFounds.AddRange(or.NotFounds);
+                this.Conflicts.AddRange(or.Conflicts);
+                this.Oks.AddRange(or.Oks);
+            }
+
+            return this;
+        }
     }
 }
