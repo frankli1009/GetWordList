@@ -43,25 +43,69 @@ namespace Dictionary.Controllers
         [ActionName("GetWord")]
         public ActionResult GetWord(int id)
         {
-            return new ConflictObjectResult(_context.GetWord(id));
+            Word w = _context.GetWord(id);
+            if (w == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(w);
+            }
         }
 
         [HttpPost("add/{word}")]
         public async Task<ActionResult<OperationResult>> PostWord(string word)
         {
-            return new ConflictObjectResult(await _context.AddWord(word, _logger));
+            OperationResult or = await _context.AddWord(word, _logger);
+            if (or.Conflicts.Any())
+            {
+                return new ConflictObjectResult(or.Conflicts[0]);
+            }
+            else if (or.Oks.Any())
+            {
+                return new OkObjectResult(or.Oks[0]);
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
         }
 
         [HttpPost("add")]
         public async Task<ActionResult<OperationResult>> PostWord(BatchWords words)
         {
-            return new ConflictObjectResult(await _context.AddWordBatch(words, _logger));
+            OperationResult or = await _context.AddWordBatch(words, _logger);
+            if (or.Conflicts.Any())
+            {
+                return new ConflictObjectResult(or);
+            }
+            else if (or.NotFounds.Any())
+            {
+                return new BadRequestObjectResult(or);
+            }
+            else if (or.Oks.Any())
+            {
+                return new OkObjectResult(or);
+            }
+            else
+            {
+                return new BadRequestObjectResult(or);
+            }
         }
 
         [HttpDelete("delete/{word}")]
-        public async Task<ActionResult<OperationResult>> DeleteWord(string word)
+        public async Task<IActionResult> DeleteWord(string word)
         {
-            return new ConflictObjectResult(await _context.DeleteWord(word));
+            bool response = await _context.DeleteWord(word);
+            if (response)
+            {
+                return new OkResult();
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
         }
 
         [HttpGet("info")]
