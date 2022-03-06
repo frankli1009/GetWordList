@@ -21,7 +21,7 @@ namespace GetWords.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _clientFactory;
-        private string _getWordsAPIUrl = $"http://getwords.franklidev.com/api/gws";
+        private string _getWordsAPIUrl = $"http://services.franklidev.com/api/gws";
 
         public HomeController(IConfiguration config, IHttpClientFactory clientFactory, ILogger<HomeController> logger, IMemoryCache cache)
         {
@@ -29,7 +29,7 @@ namespace GetWords.Controllers
             _config = config;
             _clientFactory = clientFactory;
             _logger = logger;
-            _getWordsAPIUrl = _config.GetValue<string>("GetWordsAPIUrl", $"http://getwords.franklidev.com/api/gws");
+            _getWordsAPIUrl = _config.GetValue<string>("GetWordsAPIUrl", $"http://services.franklidev.com/api/gws");
         }
 
         [HttpGet]

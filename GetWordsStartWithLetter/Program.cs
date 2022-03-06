@@ -187,7 +187,7 @@ namespace GetWordsStartWithLetter
             wordList.Words.AddRange(words);
 
             HttpContent content = new StringContent(JsonConvert.SerializeObject(wordList), Encoding.UTF8, "application/json");
-            var result = client.PostAsync("http://words.franklidev.com/dictionary/add", content: content).Result;
+            var result = client.PostAsync("http://services.franklidev.com/dictionary/add", content: content).Result;
             string resultStr = result.Content.ReadAsStringAsync().Result;
             string fileName = string.Format("Log_{0}.log", Convert.ToChar('a' + i));
             if (File.Exists(fileName))

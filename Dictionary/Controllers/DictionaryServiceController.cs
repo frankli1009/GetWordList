@@ -111,7 +111,7 @@ namespace Dictionary.Controllers
         [HttpGet("info")]
         public IActionResult Info()
         {
-            return new OkObjectResult(new { name = "Dictionary", version = "1.0.0", author = "Frank Li" });
+            return new OkObjectResult(new { name = "Dictionary", version = "2.0.0", author = "Frank Li" });
         }
     }
 }

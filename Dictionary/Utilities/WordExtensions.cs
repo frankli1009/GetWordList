@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Dictionary.Utilities
 {
-    public static class WordDbContextExtensions
+    public static class WordExtensions
     {
         public static Word GetWord(this WordDbContext context, int id)
         {

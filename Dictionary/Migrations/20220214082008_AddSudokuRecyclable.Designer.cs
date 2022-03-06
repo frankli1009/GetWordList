@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220214082008_AddSudokuRecyclable")]
+    partial class AddSudokuRecyclable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,23 +42,6 @@ namespace Dictionary.Migrations
                     b.HasIndex("SudokuTypeId");
 
                     b.ToTable("Sudokus");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.SudokuRecyclable", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("SudokuId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SudokuId");
-
-                    b.ToTable("SudokuRecyclable");
                 });
 
             modelBuilder.Entity("Dictionary.Models.SudokuType", b =>
@@ -117,17 +102,6 @@ namespace Dictionary.Migrations
                         .IsRequired();
 
                     b.Navigation("SudokuType");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.SudokuRecyclable", b =>
-                {
-                    b.HasOne("Dictionary.Models.Sudoku", "Sudoku")
-                        .WithMany()
-                        .HasForeignKey("SudokuId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sudoku");
                 });
 #pragma warning restore 612, 618
         }
