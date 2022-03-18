@@ -21,7 +21,7 @@ namespace Dictionary.Utilities
 
         public static async Task<Sudoku> AddSudoku(this WordDbContext context, string data, ILogger logger)
         {
-            Sudoku sudoku = new Sudoku() { Data = data };
+            Sudoku sudoku = new Sudoku() { Data = data, SudokuTypeId = 1 };
             try
             {
                 if (context.Sudokus.Any(s => s.Data == data))
