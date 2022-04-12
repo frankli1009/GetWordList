@@ -69,20 +69,20 @@ namespace Dictionary.Controllers
         [HttpPost("add")]
         public async Task<ActionResult> PostSudoku(BatchWords datas)
         {
-            int success = await _context.AddSudokuBatch(datas.Words, _logger);
+            BatchWords words = await _context.AddSudokuBatch(datas.Words, _logger);
             int count = datas.Words.Count();
-            if (success > 0)
+            if (words.Words.Any(w => Convert.ToInt32(w) > 0))
             {
                 try
                 {
                     await _context.SaveChangesAsync();
-                    if (success == count)
+                    if (words.Words.Count(w => Convert.ToInt32(w) > 0) == count)
                     {
-                        return new OkResult();
+                        return new OkObjectResult(words);
                     }
                     else
                     {
-                        return new ConflictResult();
+                        return new ConflictObjectResult(words);
                     }
                 }
                 catch (Exception e)

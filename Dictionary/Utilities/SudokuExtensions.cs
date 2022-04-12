@@ -66,18 +66,22 @@ namespace Dictionary.Utilities
             }
         }
 
-        public static async Task<int> AddSudokuBatch(this WordDbContext context, IEnumerable<string> datas, ILogger logger)
+        public static async Task<BatchWords> AddSudokuBatch(this WordDbContext context, IEnumerable<string> datas, ILogger logger)
         {
-            int success = 0;
+            BatchWords words = new BatchWords();
             foreach (var data in datas)
             {
                 var sudoku = await AddSudoku(context, data, logger);
                 if (sudoku != null)
                 {
-                    success++;
+                    words.Words.Add(sudoku.Id.ToString());
+                }
+                else
+                {
+                    words.Words.Add("0");
                 }
             }
-            return success;
+            return words;
         }
 
         public static async Task<bool> DeleteSudoku(this WordDbContext context, string data)
