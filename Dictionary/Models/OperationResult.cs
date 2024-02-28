@@ -3,22 +3,22 @@ using System.Collections.Generic;
 
 namespace Dictionary.Models
 {
-    public class OperationResult
+    public class OperationResult<T>
     {
         public OperationResult()
         {
             NotFounds = new List<string>();
-            Conflicts = new List<Word>();
-            Oks = new List<Word>();
-            UnknownErrors = new List<Word>();
+            Conflicts = new List<T>();
+            Oks = new List<T>();
+            UnknownErrors = new List<T>();
         }
 
         public List<string> NotFounds { get; set; }
-        public List<Word> Conflicts { get; set; }
-        public List<Word> Oks { get; set; }
-        public List<Word> UnknownErrors { get; set; }
+        public List<T> Conflicts { get; set; }
+        public List<T> Oks { get; set; }
+        public List<T> UnknownErrors { get; set; }
 
-        public OperationResult Append(OperationResult or)
+        public OperationResult<T> Append(OperationResult<T> or)
         {
             if (or != null)
             {
@@ -31,7 +31,7 @@ namespace Dictionary.Models
             return this;
         }
 
-        public OperationResult Clear()
+        public OperationResult<T> Clear()
         {
             this.NotFounds.Clear();
             this.Conflicts.Clear();

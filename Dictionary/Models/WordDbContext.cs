@@ -22,6 +22,10 @@ namespace Dictionary.Models
         public DbSet<Sudoku> Sudokus { get; set; }
         public DbSet<SudokuType> SudokuType { get; set; }
         public DbSet<SudokuRecyclable> SudokuRecyclable { get; set; }
+        public DbSet<ConsumerGoodsDetail> ConsumerGoodsDetails { get; set; }
+        public DbSet<ConsumerGoods> ConsumerGoods { get; set; }
+        public DbSet<ConsumerGoodsExtra> ConsumerGoodsExtra { get; set; }
+        public DbSet<ConsumerGoodsParameters> ConsumerGoodsParameters { get; set; }
     }
 
 }

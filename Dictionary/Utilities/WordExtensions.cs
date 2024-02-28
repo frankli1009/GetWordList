@@ -24,9 +24,9 @@ namespace Dictionary.Utilities
             }
         }
 
-        public static async Task<OperationResult> AddWord(this WordDbContext context, string word, ILogger logger)
+        public static async Task<OperationResult<Word>> AddWord(this WordDbContext context, string word, ILogger logger)
         {
-            OperationResult or = new OperationResult();
+            OperationResult<Word> or = new OperationResult<Word>();
             Word w = new Word(word);
             try
             {
@@ -50,11 +50,11 @@ namespace Dictionary.Utilities
             return or;
         }
 
-        public static async Task<OperationResult> AddWordBatch(this WordDbContext context, BatchWords words, ILogger logger)
+        public static async Task<OperationResult<Word>> AddWordBatch(this WordDbContext context, BatchWords words, ILogger logger)
         {
             bool changed = false;
-            OperationResult or = new OperationResult();
-            OperationResult orAdd = new OperationResult();
+            OperationResult<Word> or = new OperationResult<Word>();
+            OperationResult<Word> orAdd = new OperationResult<Word>();
             foreach (var word in words.Words)
             {
                 if (context.Words.Any(w => w.WordW.ToLower() == word.ToLower()))

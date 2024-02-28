@@ -55,9 +55,9 @@ namespace Dictionary.Controllers
         }
 
         [HttpPost("add/{word}")]
-        public async Task<ActionResult<OperationResult>> PostWord(string word)
+        public async Task<ActionResult<OperationResult<Word>>> PostWord(string word)
         {
-            OperationResult or = await _context.AddWord(word, _logger);
+            OperationResult<Word> or = await _context.AddWord(word, _logger);
             if (or.Conflicts.Any())
             {
                 return new ConflictObjectResult(or.Conflicts[0]);
@@ -73,9 +73,9 @@ namespace Dictionary.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<ActionResult<OperationResult>> PostWord(BatchWords words)
+        public async Task<ActionResult<OperationResult<Word>>> PostWord(BatchWords words)
         {
-            OperationResult or = await _context.AddWordBatch(words, _logger);
+            OperationResult<Word> or = await _context.AddWordBatch(words, _logger);
             if (or.Conflicts.Any())
             {
                 return new ConflictObjectResult(or);

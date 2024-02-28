@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240225101340_AddConsumerTables")]
+    partial class AddConsumerTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +52,7 @@ namespace Dictionary.Migrations
                     b.Property<string>("Info")
                         .HasColumnType("varchar(254)");
 
-                    b.Property<float?>("Price")
+                    b.Property<float>("Price")
                         .HasColumnType("real");
 
                     b.Property<float>("Quantity")
@@ -64,61 +66,6 @@ namespace Dictionary.Migrations
                     b.HasIndex("ConsumerGoodsId");
 
                     b.ToTable("ConsumerGoodsDetails");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ConsumerGoodsExtra", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ConsumerGoodsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Info")
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConsumerGoodsId");
-
-                    b.ToTable("ConsumerGoodsExtra");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ConsumerGoodsParameters", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ConsumerGoodsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Info")
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<string>("Params")
-                        .HasColumnType("varchar(254)");
-
-                    b.Property<int>("StartDay")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Valid")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConsumerGoodsId");
-
-                    b.ToTable("ConsumerGoodsParameters");
                 });
 
             modelBuilder.Entity("Dictionary.Models.Sudoku", b =>
@@ -211,28 +158,6 @@ namespace Dictionary.Migrations
                 });
 
             modelBuilder.Entity("Dictionary.Models.ConsumerGoodsDetail", b =>
-                {
-                    b.HasOne("Dictionary.Models.ConsumerGoods", "ConsumerGoods")
-                        .WithMany()
-                        .HasForeignKey("ConsumerGoodsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ConsumerGoods");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ConsumerGoodsExtra", b =>
-                {
-                    b.HasOne("Dictionary.Models.ConsumerGoods", "ConsumerGoods")
-                        .WithMany()
-                        .HasForeignKey("ConsumerGoodsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ConsumerGoods");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ConsumerGoodsParameters", b =>
                 {
                     b.HasOne("Dictionary.Models.ConsumerGoods", "ConsumerGoods")
                         .WithMany()
