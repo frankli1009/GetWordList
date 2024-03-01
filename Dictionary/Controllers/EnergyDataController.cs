@@ -26,6 +26,20 @@ namespace Dictionary.Controllers
         }
 
 
+        [HttpGet("gettype")]
+        public ActionResult GetEnergyType()
+        {
+            List<ConsumerGoods> s = _context.ConsumerGoods.ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("get/{energyType}/{year}/{month}")]
         public ActionResult GetEnergyData(int energyType, int year, int month)
         {
