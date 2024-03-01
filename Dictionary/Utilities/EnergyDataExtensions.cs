@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dictionary.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Dictionary.Utilities
@@ -12,6 +13,11 @@ namespace Dictionary.Utilities
         public static int GetEnergyDataCount(this WordDbContext context)
         {
             return (from s in context.ConsumerGoodsDetails select s.Id).Count();
+        }
+
+        public static ConsumerGoodsDetail GetEnergyData(this WordDbContext context, int Id)
+        {
+            return context.ConsumerGoodsDetails.Where<ConsumerGoodsDetail>(s => s.Id == Id).First();
         }
 
         public static List<ConsumerGoodsDetail> GetEnergyData(this WordDbContext context, int energyTypeId, int year, int month)
@@ -60,7 +66,10 @@ namespace Dictionary.Utilities
             {
                 await context.ConsumerGoodsDetails.AddAsync(data);
                 await context.SaveChangesAsync();
-                return data;
+
+                await context.Entry(data).ReloadAsync();
+                ConsumerGoodsDetail goodsDetail = context.ConsumerGoodsDetails.Where(d => d.Id == data.Id).First();
+                return goodsDetail;
             }
             catch (Exception e)
             {
