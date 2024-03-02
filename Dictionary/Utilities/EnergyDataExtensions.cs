@@ -68,8 +68,7 @@ namespace Dictionary.Utilities
                 await context.SaveChangesAsync();
 
                 await context.Entry(data).ReloadAsync();
-                ConsumerGoodsDetail goodsDetail = context.ConsumerGoodsDetails.Where(d => d.Id == data.Id).First();
-                return goodsDetail;
+                return data;
             }
             catch (Exception e)
             {
