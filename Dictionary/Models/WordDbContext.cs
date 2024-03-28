@@ -26,6 +26,12 @@ namespace Dictionary.Models
         public DbSet<ConsumerGoods> ConsumerGoods { get; set; }
         public DbSet<ConsumerGoodsExtra> ConsumerGoodsExtra { get; set; }
         public DbSet<ConsumerGoodsParameters> ConsumerGoodsParameters { get; set; }
+        public DbSet<DailyTask> DailyTasks { get; set; }
+        public DbSet<DailyTaskSub> DailyTaskSubs { get; set; }
+        public DbSet<DailyTaskSchedule> DailyTaskSchedules { get; set; }
+        public DbSet<DailyTaskScheduleDetail> DailyTaskScheduleDetails { get; set; }
+        public DbSet<DailyTaskStatus> DailyTaskStatuses { get; set; }
+        public DbSet<DailyTaskType> DailyTaskTypes { get; set; }
     }
 
 }
