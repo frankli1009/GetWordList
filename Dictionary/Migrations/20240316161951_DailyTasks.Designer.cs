@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240316161951_DailyTasks")]
+    partial class DailyTasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -404,13 +406,13 @@ namespace Dictionary.Migrations
 
             modelBuilder.Entity("Dictionary.Models.DailyTaskSchedule", b =>
                 {
-                    b.HasOne("Dictionary.Models.DailyTask", "DailyTask")
+                    b.HasOne("Dictionary.Models.DailyTask", "DailyTaskSub")
                         .WithMany()
                         .HasForeignKey("DailyTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DailyTask");
+                    b.Navigation("DailyTaskSub");
                 });
 
             modelBuilder.Entity("Dictionary.Models.DailyTaskScheduleDetail", b =>
