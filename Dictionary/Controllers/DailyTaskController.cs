@@ -120,7 +120,7 @@ namespace Dictionary.Controllers
         [HttpGet("gettasksubs/{taskid}")]
         public ActionResult GetDailyTaskSub(int taskId)
         {
-            List<DailyTaskSub> s = _context.DailyTaskSubs.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.Id).ToList();
+            List<DailyTaskSub> s = _context.DailyTaskSubs.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.OrderId).ToList();
             if (s == null)
             {
                 return new NotFoundResult();
@@ -135,7 +135,7 @@ namespace Dictionary.Controllers
         public ActionResult GetDailyTaskSchedules(int taskId)
         {
             List<DailyTaskScheduleUnit> sus = new List<DailyTaskScheduleUnit>();
-            List<DailyTaskSchedule> s = _context.DailyTaskSchedules.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.Id).ToList();
+            List<DailyTaskSchedule> s = _context.DailyTaskSchedules.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.ActDate).ToList();
             if (s == null)
             {
                 return new NotFoundResult();
@@ -147,7 +147,7 @@ namespace Dictionary.Controllers
                     DailyTaskScheduleUnit su = new DailyTaskScheduleUnit() { DailyTaskSchedule = s1 };
                     List<DailyTaskScheduleDetail> sd = _context.DailyTaskScheduleDetails
                         .Where(d => d.DailyTaskScheduleId == su.DailyTaskSchedule.Id)
-                        .OrderBy(d => d.Id)
+                        .OrderBy(d => d.OrderId)
                         .ToList();
                     su.DailyTaskScheduleDetails.AddRange(sd);
                     sus.Add(su);
@@ -174,6 +174,34 @@ namespace Dictionary.Controllers
         public async Task<ActionResult<DailyTaskScheduleResponse>> AddDailyTaskDetails(DailyTaskScheduleSubmit dailyTaskScheduleSubmit)
         {
             DailyTaskScheduleResponse dailyTaskScheduleResponse = await _context.AddDailyTaskSchedules(dailyTaskScheduleSubmit, _logger);
+            if (!(dailyTaskScheduleResponse is null) && dailyTaskScheduleResponse.Errors.Count == 0)
+            {
+                return new OkObjectResult(dailyTaskScheduleResponse);
+            }
+            else
+            {
+                return new BadRequestObjectResult(dailyTaskScheduleResponse);
+            }
+        }
+
+        [HttpPost("update")]
+        public async Task<ActionResult<DailyTaskResponse>> UPdateDailyTask(DailyTaskSubmit dailyTaskSubmit)
+        {
+            DailyTaskResponse dailyTaskResponse = await _context.UpdateDailyTask(dailyTaskSubmit, _logger);
+            if (!(dailyTaskResponse is null) && (dailyTaskResponse.Errors.Count == 0))
+            {
+                return new OkObjectResult(dailyTaskResponse);
+            }
+            else
+            {
+                return new BadRequestObjectResult(dailyTaskResponse);
+            }
+        }
+
+        [HttpPost("updateschedule")]
+        public async Task<ActionResult<DailyTaskScheduleResponse>> UpdateDailyTaskDetails(DailyTaskScheduleSubmit dailyTaskScheduleSubmit)
+        {
+            DailyTaskScheduleResponse dailyTaskScheduleResponse = await _context.UpdateDailyTaskSchedules(dailyTaskScheduleSubmit, _logger);
             if (!(dailyTaskScheduleResponse is null) && dailyTaskScheduleResponse.Errors.Count == 0)
             {
                 return new OkObjectResult(dailyTaskScheduleResponse);

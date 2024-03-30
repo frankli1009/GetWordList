@@ -12,6 +12,7 @@ namespace Dictionary.Models
         public int DailyTaskSubId { get; set; }
         [Column(TypeName = "varchar(254)")]
         public string Info { get; set; }
+        public int OrderId { get; set; }
 
         public int DailyTaskScheduleId { get; set; }
         public virtual DailyTaskSchedule  DailyTaskSchedule { get; set; }

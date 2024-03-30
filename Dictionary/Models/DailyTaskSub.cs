@@ -10,8 +10,9 @@ namespace Dictionary.Models
 		}
         public int Id { get; set; }
         public int WorkLoad { get; set; }
-        [Column(TypeName = "varchar(254)")]
+        [Column(TypeName = "nvarchar(254)")]
         public string Info { get; set; }
+        public int OrderId { get; set; }
 
         public int DailyTaskId { get; set; }
         public virtual DailyTask DailyTask { get; set; }
