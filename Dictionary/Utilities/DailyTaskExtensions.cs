@@ -303,6 +303,21 @@ namespace Dictionary.Utilities
                     }
 
                 }
+
+                // Deleted whole schedule
+                var newAllSchedules = context.DailyTaskSchedules.Where(s => s.DailyTaskId == data.TaskId).ToList();
+                var toDeleteSchedules = newAllSchedules.Where(s => !data.DailyTaskScheduleUnits.Any(s2 => s2.DailyTaskSchedule.ActDate.Year == s.ActDate.Year && s2.DailyTaskSchedule.ActDate.DayOfYear == s.ActDate.DayOfYear));
+                if (toDeleteSchedules.Count() > 0)
+                {
+                    foreach(var toDeleteSchedule in toDeleteSchedules)
+                    {
+                        context.DailyTaskScheduleDetails.RemoveRange(context.DailyTaskScheduleDetails.Where(d => d.DailyTaskScheduleId == toDeleteSchedule.Id));
+                        await context.SaveChangesAsync();
+                    }
+                    context.DailyTaskSchedules.RemoveRange(toDeleteSchedules);
+                    await context.SaveChangesAsync();
+                }
+
                 return dailyTaskScheduleResponse;
             }
             catch (Exception e)
