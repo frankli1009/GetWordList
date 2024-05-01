@@ -83,6 +83,27 @@ namespace Dictionary.Controllers
             }
         }
 
+        [HttpGet("gettasksoverdue")]
+        public ActionResult GetDailyTasksOverdue()
+        {
+            string sql = "Select * from DailyTasks where Id in (" +
+                "select DailyTaskId from DailyTaskSchedules where Id in (" +
+                "select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
+                "DailyTaskStatusId < 3) and ActDate<Convert(DateTime, '"+
+                DateTime.Now.ToString("yyyy-MM-dd")+"', 20))";
+            var s = _context.DailyTasks.FromSqlRaw(sql)
+                .OrderBy(d => d.Id)
+                .ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("gettaskshist/{datetype}/{startdate}/{enddate}")]
         public ActionResult GetDailyTasksHist(int dateType, string startDate, string endDate)
         {
