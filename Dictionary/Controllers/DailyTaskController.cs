@@ -138,6 +138,22 @@ namespace Dictionary.Controllers
             }
         }
 
+        [HttpGet("getmoretaskstoday")]
+        public ActionResult GetDailyTasksMore()
+        {
+            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate.Year == DateTime.Now.Year && d.EndDate.DayOfYear == DateTime.Now.DayOfYear)
+                .OrderBy(d => d.Id)
+                .ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("gettasksubs/{taskid}")]
         public ActionResult GetDailyTaskSub(int taskId)
         {
