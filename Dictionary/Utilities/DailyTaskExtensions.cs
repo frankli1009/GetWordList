@@ -118,6 +118,7 @@ namespace Dictionary.Utilities
             taskSub.Info = src.Info;
             taskSub.WorkLoad = src.WorkLoad;
             taskSub.OrderId = src.OrderId;
+            taskSub.ExtraInfo = src.ExtraInfo;
         }
 
         public static async Task<DailyTaskResponse> UpdateDailyTask(this WordDbContext context, DailyTaskSubmit dailyTaskSubmit, ILogger logger)
