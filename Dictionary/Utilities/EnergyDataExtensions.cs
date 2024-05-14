@@ -57,7 +57,10 @@ namespace Dictionary.Utilities
                 }
                 startTime = new DateTime(startYear, startMonth, day);
             }
-            return context.ConsumerGoodsDetails.Where<ConsumerGoodsDetail>(s =>s.ConsumerGoodsId == energyTypeId && s.Time > startTime && s.Time < endTime).ToList<ConsumerGoodsDetail>();
+            return context.ConsumerGoodsDetails
+                .Where<ConsumerGoodsDetail>(s =>s.ConsumerGoodsId == energyTypeId && s.Time > startTime && s.Time < endTime)
+                .OrderBy(s => s.Time)
+                .ToList<ConsumerGoodsDetail>();
         }
 
         public static ConsumerGoodsDetail GetEnergyDataLatest(this WordDbContext context, int energyTypeId)
@@ -107,8 +110,10 @@ namespace Dictionary.Utilities
                 startTime = new DateTime(startYear, startMonth, day);
             }
 
-            return context.ConsumerGoodsDetails.Where<ConsumerGoodsDetail>(s => s.ConsumerGoodsId == energyTypeId && s.Time > startTime && s.Time < endTime).
-                OrderByDescending(s => s.Time).FirstOrDefault();
+            return context.ConsumerGoodsDetails
+                .Where<ConsumerGoodsDetail>(s => s.ConsumerGoodsId == energyTypeId && s.Time > startTime && s.Time < endTime)
+                .OrderByDescending(s => s.Time)
+                .FirstOrDefault();
         }
 
         public static async Task<ConsumerGoodsDetail> AddEnergyData(this WordDbContext context, ConsumerGoodsDetail data, ILogger logger)
