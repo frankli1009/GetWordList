@@ -18,6 +18,9 @@ namespace Dictionary.Models
         [Column(TypeName = "varchar(254)")]
         public string Info { get; set; }
         public DateTime LogTime { get; set; }
+
+        public int OpLogLevelId { get; set; }
+        public virtual OpLogLevel OpLogLevel { get; set; }
     }
 }
 
