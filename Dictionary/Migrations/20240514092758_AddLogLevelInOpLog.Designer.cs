@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    [Migration("20240514085252_AddLogLevelInOpLog")]
+    [Migration("20240514092758_AddLogLevelInOpLog")]
     partial class AddLogLevelInOpLog
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

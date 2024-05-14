@@ -25,11 +25,48 @@ namespace Dictionary.Controllers
             _logger = logger;
         }
 
+        [HttpGet("loglevels")]
+        public ActionResult GetLogLevels()
+        {
+            List<OpLogLevel> s = _context.OpLogLevels
+                .OrderBy(o => o.LevelId)
+                .ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("logs/{key}/{startDate}/{endDate}")]
         public ActionResult GetLogs(string key, DateTime startDate, DateTime endDate)
         {
             endDate = endDate.AddDays(1);
             List<OpLog> s = _context.OpLogs.Where(o => o.Key.ToLower() == key.ToLower() && o.LogTime >= startDate && o.LogTime <= endDate)
+                .OrderBy(o => o.Id)
+                .ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
+        [HttpGet("errorlogs/{key}/{startDate}/{endDate}")]
+        public ActionResult GetErrorLogs(string key, DateTime startDate, DateTime endDate)
+        {
+            int levelId = 0;
+            var opLogLevel = _context.OpLogLevels.FirstOrDefault(l => l.LevelId == (int)LogLevel.Error);
+            if (opLogLevel != null) levelId = opLogLevel.Id;
+            endDate = endDate.AddDays(1);
+            List<OpLog> s = _context.OpLogs.Where(o => o.Key.ToLower() == key.ToLower() &&
+                o.LogTime >= startDate && o.LogTime <= endDate && o.OpLogLevelId == levelId)
                 .OrderBy(o => o.Id)
                 .ToList();
             if (s == null)
@@ -96,7 +133,7 @@ namespace Dictionary.Controllers
         {
             try
             {
-                endDate = endDate.AddDays(1);
+               endDate = endDate.AddDays(1);
                 var opLogs = _context.OpLogs.Where(o => o.Key.ToLower() == key.ToLower() && o.LogTime >= startDate && o.LogTime <= endDate);
                 _context.OpLogs.RemoveRange(opLogs);
                 _context.SaveChanges();

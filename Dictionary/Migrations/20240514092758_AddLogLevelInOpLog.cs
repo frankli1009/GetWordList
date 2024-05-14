@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System.Diagnostics;
+using System.Security.Policy;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.VisualBasic;
 
 namespace Dictionary.Migrations
 {
@@ -26,11 +29,16 @@ namespace Dictionary.Migrations
                 {
                     table.PrimaryKey("PK_OpLogLevels", x => x.Id);
                 });
-            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (0, 'Info')");
-            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (1, 'Success')");
-            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (2, 'Warning')");
-            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (3, 'Error')");
-            migrationBuilder.Sql("Update a Set a.OpLogLevelId = b.Id from OpLogs a, OpLogLevels b Where a.OpLogLevelId is null and b.LevelId = 0");
+
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (0, 'Trace')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (1, 'Debug')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (2, 'Information')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (3, 'Warning')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (4, 'Error')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (5, 'Critical')");
+            migrationBuilder.Sql("Insert Into OpLogLevels (LevelId, Name) Values (6, 'None')");
+
+            migrationBuilder.Sql("Update a set a.OpLogLevelId = b.Id From OpLogs a, OpLogLevels b Where a.OpLogLevelId is null and b.LevelId = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OpLogs_OpLogLevelId",
