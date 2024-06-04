@@ -289,6 +289,7 @@ namespace Dictionary.Utilities
                         else
                         {
                             // New schedule detail
+                            detail.Id = 0;
                             await context.DailyTaskScheduleDetails.AddAsync(detail);
                         }
                         await context.SaveChangesAsync();
