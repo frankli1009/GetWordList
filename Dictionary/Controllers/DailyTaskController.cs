@@ -141,7 +141,9 @@ namespace Dictionary.Controllers
         [HttpGet("getmoretaskstoday")]
         public ActionResult GetDailyTasksMore()
         {
-            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate.Year == DateTime.Now.Year && d.EndDate.DayOfYear == DateTime.Now.DayOfYear)
+            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 &&
+                    ((d.EndDate.Year == DateTime.Now.Year && d.EndDate.DayOfYear >= DateTime.Now.DayOfYear) ||
+                    (d.EndDate.Year > DateTime.Now.Year)))
                 .OrderBy(d => d.Id)
                 .ToList();
             if (s == null)
