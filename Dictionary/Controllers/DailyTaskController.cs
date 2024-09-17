@@ -86,11 +86,19 @@ namespace Dictionary.Controllers
         [HttpGet("gettasksoverdue")]
         public ActionResult GetDailyTasksOverdue()
         {
-            string sql = "Select * from DailyTasks where Id in (" +
+            string sql = "Select * from DailyTasks where " +
+                "(DailyTaskTypeId in (1, 2) and Id in (" +
                 "select DailyTaskId from DailyTaskSchedules where Id in (" +
                 "select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
-                "DailyTaskStatusId < 3) and ActDate<Convert(DateTime, '"+
-                DateTime.Now.ToString("yyyy-MM-dd")+"', 20))";
+                "DailyTaskStatusId < 3) and ActDate<Convert(DateTime, '" +
+                DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) " +
+                "or " +
+                "(DailyTaskTypeId = 3 and EndDate<Convert(DateTime, '" +
+                DateTime.Now.ToString("yyyy-MM-dd") + "', 20) and DailyTaskStatusId < 3)";
+                //"Id in ("+
+                //"Select DailyTaskId from DailyTaskSchedules where Id in (" +
+                //"select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
+                //"DailyTaskStatusId < 3)))";
             var s = _context.DailyTasks.FromSqlRaw(sql)
                 .OrderBy(d => d.Id)
                 .ToList();

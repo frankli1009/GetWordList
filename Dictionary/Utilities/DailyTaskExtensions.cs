@@ -213,6 +213,10 @@ namespace Dictionary.Utilities
                     foreach (var detail in scheduleUnit.DailyTaskScheduleDetails)
                     {
                         detail.DailyTaskScheduleId = scheduleUnit.DailyTaskSchedule.Id;
+                        if (detail.DailyTaskStatusId == 0)
+                        {
+                            detail.DailyTaskStatusId = 1;
+                        }
                         await context.DailyTaskScheduleDetails.AddAsync(detail);
                         await context.SaveChangesAsync();
                     }
