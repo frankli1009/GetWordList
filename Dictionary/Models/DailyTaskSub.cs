@@ -15,6 +15,7 @@ namespace Dictionary.Models
         public int OrderId { get; set; }
         [Column(TypeName = "nvarchar(254)")]
         public string ExtraInfo { get; set; }
+        public int Optional { get; set; }
 
         public int DailyTaskId { get; set; }
         public virtual DailyTask DailyTask { get; set; }

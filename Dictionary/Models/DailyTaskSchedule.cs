@@ -12,6 +12,7 @@ namespace Dictionary.Models
         public DateTime ActDate { get; set; }
         [Column(TypeName = "varchar(254)")]
         public string Info { get; set; }
+        public int DailyTaskStatusId { get; set; }
 
         public int DailyTaskId { get; set; }
         public virtual DailyTask DailyTask { get; set; }

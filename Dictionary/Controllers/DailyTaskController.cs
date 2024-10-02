@@ -87,14 +87,14 @@ namespace Dictionary.Controllers
         public ActionResult GetDailyTasksOverdue()
         {
             string sql = "Select * from DailyTasks where " +
-                "(DailyTaskTypeId in (1, 2) and Id in (" +
+                "((DailyTaskTypeId in (1, 2) and Id in (" +
                 "select DailyTaskId from DailyTaskSchedules where Id in (" +
                 "select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
                 "DailyTaskStatusId < 3) and ActDate<Convert(DateTime, '" +
                 DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) " +
                 "or " +
                 "(DailyTaskTypeId = 3 and EndDate<Convert(DateTime, '" +
-                DateTime.Now.ToString("yyyy-MM-dd") + "', 20) and DailyTaskStatusId < 3)";
+                DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) and DailyTaskStatusId < 3";
                 //"Id in ("+
                 //"Select DailyTaskId from DailyTaskSchedules where Id in (" +
                 //"select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
@@ -232,7 +232,7 @@ namespace Dictionary.Controllers
         }
 
         [HttpPost("update")]
-        public async Task<ActionResult<DailyTaskResponse>> UPdateDailyTask(DailyTaskSubmit dailyTaskSubmit)
+        public async Task<ActionResult<DailyTaskResponse>> UpdateDailyTask(DailyTaskSubmit dailyTaskSubmit)
         {
             DailyTaskResponse dailyTaskResponse = await _context.UpdateDailyTask(dailyTaskSubmit, _logger);
             if (!(dailyTaskResponse is null) && (dailyTaskResponse.Errors.Count == 0))
@@ -274,46 +274,8 @@ namespace Dictionary.Controllers
 
                 var sub = _context.DailyTaskSubs.Where(su => su.Id == s.DailyTaskSubId).First();
                 var task = _context.DailyTasks.Where(t => t.Id == sub.DailyTaskId).First();
-                if (task.DailyTaskStatusId == statusId)
-                {
-                    return new OkObjectResult(new Tuple<int, int>(statusId, statusId));
-                }
-
-                var schedules = _context.DailyTaskSchedules.Where(sc => sc.DailyTaskId == task.Id).ToList();
-                if (statusId == 1)
-                {
-                    for(int i = 0; i < schedules.Count(); i++)
-                    {
-                        if(_context.DailyTaskScheduleDetails.Any(d => d.DailyTaskScheduleId == schedules[i].Id && d.DailyTaskStatusId > 1))
-                        {
-                            if (task.DailyTaskStatusId == 3)
-                            {
-                                task.DailyTaskStatusId = 2;
-                                _context.SaveChanges();
-                            }
-                            return new OkObjectResult(new Tuple<int, int>(1, 2));
-                        }
-                    }
-                    return new OkObjectResult(new Tuple<int, int>(1, 1));
-                }
-                else //if (statusId == 3) // only 1 and 3 for sub task status
-                {
-                    for (int i = 0; i < schedules.Count(); i++)
-                    {
-                        if (_context.DailyTaskScheduleDetails.Any(d => d.DailyTaskScheduleId == schedules[i].Id && d.DailyTaskStatusId < 3))
-                        {
-                            if (task.DailyTaskStatusId == 1)
-                            {
-                                task.DailyTaskStatusId = 2;
-                                _context.SaveChanges();
-                            }
-                            return new OkObjectResult(new Tuple<int, int>(3, 2));
-                        }
-                    }
-                    task.DailyTaskStatusId = 3;
-                    _context.SaveChanges();
-                    return new OkObjectResult(new Tuple<int, int>(3, 3));
-                }
+                int taskStatusId = task.DailyTaskStatusId;
+                return new OkObjectResult(new Tuple<int, int>(statusId, taskStatusId));
             }
         }
     }

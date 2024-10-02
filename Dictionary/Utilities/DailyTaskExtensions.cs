@@ -109,6 +109,7 @@ namespace Dictionary.Utilities
             dailyTask.EndDate = src.EndDate;
             dailyTask.StartDate = src.StartDate;
             dailyTask.Info = src.Info;
+            dailyTask.DoneLeastWorkload = src.DoneLeastWorkload;
             dailyTask.Name = src.Name;
             dailyTask.Time = src.Time;
         }
@@ -118,6 +119,7 @@ namespace Dictionary.Utilities
             taskSub.Info = src.Info;
             taskSub.WorkLoad = src.WorkLoad;
             taskSub.OrderId = src.OrderId;
+            taskSub.Optional = src.Optional;
             taskSub.ExtraInfo = src.ExtraInfo;
         }
 

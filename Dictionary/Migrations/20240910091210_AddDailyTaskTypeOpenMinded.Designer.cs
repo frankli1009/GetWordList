@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240910091210_AddDailyTaskTypeOpenMinded")]
+    partial class AddDailyTaskTypeOpenMinded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,9 +136,6 @@ namespace Dictionary.Migrations
                     b.Property<int>("DailyTaskTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DoneLeastWorkload")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -170,9 +169,6 @@ namespace Dictionary.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("DailyTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DailyTaskStatusId")
                         .HasColumnType("int");
 
                     b.Property<string>("Info")
@@ -249,9 +245,6 @@ namespace Dictionary.Migrations
 
                     b.Property<string>("Info")
                         .HasColumnType("nvarchar(254)");
-
-                    b.Property<int>("Optional")
-                        .HasColumnType("int");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");

@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241002083901_AddStatusIdToTaskSchedule")]
+    partial class AddStatusIdToTaskSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
