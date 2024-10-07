@@ -70,7 +70,7 @@ namespace Dictionary.Controllers
         [HttpGet("gettaskscur")]
         public ActionResult GetDailyTasksCur()
         {
-            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId < 3)
+            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId < 3 && d.Suspended == 0)
                 .OrderBy(d => d.Id)
                 .ToList();
             if (s == null)
@@ -94,7 +94,8 @@ namespace Dictionary.Controllers
                 DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) " +
                 "or " +
                 "(DailyTaskTypeId = 3 and EndDate<Convert(DateTime, '" +
-                DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) and DailyTaskStatusId < 3";
+                DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) "+
+                "and DailyTaskStatusId < 3 and Suspended = 0";
                 //"Id in ("+
                 //"Select DailyTaskId from DailyTaskSchedules where Id in (" +
                 //"select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
@@ -146,10 +147,44 @@ namespace Dictionary.Controllers
             }
         }
 
+        [HttpGet("gettasks/{datetype}/{startdate}/{enddate}")]
+        public ActionResult GetDailyTasks(int dateType, string startDate, string endDate)
+        {
+            DateTime start = DateTime.Parse(startDate);
+            DateTime end = DateTime.Parse(endDate).AddDays(1);
+            List<DailyTask> s;
+            if (dateType == 1) // StartDate
+            {
+                s = _context.DailyTasks.Where(d => d.StartDate < end && d.StartDate >= start)
+                .OrderBy(d => d.Id)
+                .ToList();
+            }
+            else if (dateType == 2) // EndDate
+            {
+                s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start)
+                .OrderBy(d => d.Id)
+                .ToList();
+            }
+            else // StartDate >= EndDate <=
+            {
+                s = _context.DailyTasks.Where(d => d.EndDate < end && d.StartDate >= start)
+                .OrderBy(d => d.Id)
+                .ToList();
+            }
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("getmoretaskstoday")]
         public ActionResult GetDailyTasksMore()
         {
-            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 &&
+            var s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Suspended == 0 &&
                     ((d.EndDate.Year == DateTime.Now.Year && d.EndDate.DayOfYear >= DateTime.Now.DayOfYear) ||
                     (d.EndDate.Year > DateTime.Now.Year)))
                 .OrderBy(d => d.Id)
@@ -276,6 +311,153 @@ namespace Dictionary.Controllers
                 var task = _context.DailyTasks.Where(t => t.Id == sub.DailyTaskId).First();
                 int taskStatusId = task.DailyTaskStatusId;
                 return new OkObjectResult(new Tuple<int, int>(statusId, taskStatusId));
+            }
+        }
+
+        [HttpDelete("delete")]
+        public async Task<ActionResult<string>> DeleteDailyTask(DailyTaskSuspended dtSuspended)
+        {
+            var t = _context.DailyTasks.Where(d => d.Id == dtSuspended.DailyTaskId).FirstOrDefault();
+            if (t == null)
+            {
+                return new BadRequestObjectResult($"Task {dtSuspended.DailyTaskId} does not exist.");
+            }
+            else
+            {
+                try
+                {
+                    if (t.Suspended < 2)
+                    {
+                        t.Suspended = 2;
+
+                        if (_context.DailyTaskSuspendeds.Any(s => s.DailyTaskId == dtSuspended.DailyTaskId))
+                        {
+                            await _context.Database.ExecuteSqlRawAsync(
+                                "UPDATE [dbo].[DailyTaskSuspendeds] SET SuspendedId = SuspendedId + 1 WHERE DailyTaskId = " +
+                                dtSuspended.DailyTaskId.ToString());
+                        }
+                        await _context.DailyTaskSuspendeds.AddAsync(dtSuspended);
+
+                        await _context.SaveChangesAsync();
+
+                        return new OkObjectResult("Delete DailyTask OK.");
+                    }
+                    else
+                    {
+                        // undelete the task
+                        DailyTaskSuspended s = _context.DailyTaskSuspendeds.Where(d2 => d2.DailyTaskId == dtSuspended.DailyTaskId && d2.SuspendedId == 0).FirstOrDefault();
+                        if (s == null)
+                        {
+                            return new BadRequestObjectResult($"Original deleted record of task {dtSuspended.DailyTaskId} does not exist.");
+                        }
+                        else
+                        {
+                            s.Info = s.Info + "; " + dtSuspended.Info;
+                            s.EndDate = dtSuspended.EndDate;
+
+                            // renew the task schedule dates
+                            DateTime endDate = s.EndDate ?? s.StartDate;
+                            int suspendDays = (endDate - s.StartDate).Days;
+                            await _context.Database.ExecuteSqlRawAsync(
+                                "UPDATE [dbo].[DailyTaskSchedules] SET ActDate = DATEADD(dd, " + suspendDays.ToString() +
+                                ", ActDate) WHERE DailyTaskId = " + dtSuspended.DailyTaskId.ToString() +
+                                " AND DailyTaskStatusId = 1 AND ActDate >= CONVERT(DATETIME, '" +
+                                s.StartDate.ToString("yyyy-MM-dd") + "', 102)");
+
+                            t.Suspended = 0;
+                            t.EndDate = t.EndDate.AddDays(suspendDays);
+
+                            await _context.SaveChangesAsync();
+
+                            return new OkObjectResult("Undelete DailyTask OK.");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    return new BadRequestObjectResult(e.Message);
+                }
+            }
+        }
+
+        [HttpPut("suspended")]
+        public async Task<ActionResult<string>> SuspendedDailyTask(DailyTaskSuspended dtSuspended)
+        {
+            DailyTask t = _context.DailyTasks.Where(d => d.Id == dtSuspended.DailyTaskId).FirstOrDefault();
+            if (t == null)
+            {
+                return new BadRequestObjectResult($"Task {dtSuspended.DailyTaskId} does not exist.");
+            }
+            else
+            {
+                try
+                {
+                    if (t.Suspended == 1)
+                    {
+                        // reactivate the task
+                        DailyTaskSuspended s = _context.DailyTaskSuspendeds.Where(d2 => d2.DailyTaskId == dtSuspended.DailyTaskId && d2.SuspendedId == 0).FirstOrDefault();
+                        if (s == null)
+                        {
+                            return new BadRequestObjectResult($"Original suspended record of task {dtSuspended.DailyTaskId} does not exist.");
+                        }
+                        else
+                        {
+                            s.Info = s.Info + "; " + dtSuspended.Info;
+                            s.EndDate = dtSuspended.EndDate;
+
+                            // renew the task schedule dates
+                            DateTime endDate = s.EndDate ?? s.StartDate;
+                            int suspendDays = (endDate - s.StartDate).Days;
+                            await _context.Database.ExecuteSqlRawAsync(
+                                "UPDATE [dbo].[DailyTaskSchedules] SET ActDate = DATEADD(dd, " + suspendDays.ToString() +
+                                ", ActDate) WHERE DailyTaskId = " + dtSuspended.DailyTaskId.ToString() +
+                                " AND DailyTaskStatusId = 1 AND ActDate >= CONVERT(DATETIME, '" +
+                                s.StartDate.ToString("yyyy-MM-dd") + "', 102)");
+
+                            t.Suspended = 0;
+                            t.EndDate = t.EndDate.AddDays(suspendDays);
+
+                            await _context.SaveChangesAsync();
+
+                            return new OkObjectResult("Activate suspended DailyTask OK.");
+                        }
+                    }
+                    else
+                    {
+                        t.Suspended = 1;
+
+                        if (_context.DailyTaskSuspendeds.Any(s => s.DailyTaskId == dtSuspended.DailyTaskId))
+                        {
+                            await _context.Database.ExecuteSqlRawAsync(
+                                "UPDATE [dbo].[DailyTaskSuspendeds] SET SuspendedId = SuspendedId + 1 WHERE DailyTaskId = " +
+                                dtSuspended.DailyTaskId.ToString());
+                        }
+                        await _context.DailyTaskSuspendeds.AddAsync(dtSuspended);
+
+                        await _context.SaveChangesAsync();
+
+                        return new OkObjectResult("Suspend DailyTask OK.");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    return new BadRequestObjectResult(e.Message);
+                }
+            }
+        }
+
+        [HttpGet("getsuspendeds/{taskid}")]
+        public ActionResult GetDailyTaskSuspendeds(int taskId)
+        {
+            List<DailyTaskSuspended> s = _context.DailyTaskSuspendeds.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.SuspendedId).ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
             }
         }
     }

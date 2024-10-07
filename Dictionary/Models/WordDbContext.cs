@@ -32,6 +32,7 @@ namespace Dictionary.Models
         public DbSet<DailyTaskScheduleDetail> DailyTaskScheduleDetails { get; set; }
         public DbSet<DailyTaskStatus> DailyTaskStatuses { get; set; }
         public DbSet<DailyTaskType> DailyTaskTypes { get; set; }
+        public DbSet<DailyTaskSuspended> DailyTaskSuspendeds { get; set; }
         public DbSet<ToolKeyParam> ToolKeyParams { get; set; }
         public DbSet<OpLog> OpLogs { get; set; }
         public DbSet<OpLogLevel> OpLogLevels { get; set; }
