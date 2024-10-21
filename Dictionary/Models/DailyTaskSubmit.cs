@@ -7,11 +7,11 @@ namespace Dictionary.Models
 	{
 		public DailyTaskSubmit()
 		{
-			DailyTaskSubs = new List<DailyTaskSub>();
+			DailyTaskSubUnits = new List<DailyTaskSubUnit>();
 		}
 
 		public DailyTask DailyTask { get; set; }
-		public List<DailyTaskSub> DailyTaskSubs { get; set; }
+		public List<DailyTaskSubUnit> DailyTaskSubUnits { get; set; }
 	}
 }
 

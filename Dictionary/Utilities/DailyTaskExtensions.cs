@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dictionary.Migrations;
 using Dictionary.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -31,10 +32,18 @@ namespace Dictionary.Utilities
                 var dailyTaskEntry = await context.DailyTasks.AddAsync(dailyTaskSubmit.DailyTask);
                 await context.SaveChangesAsync();
 
-                foreach (var sub in dailyTaskSubmit.DailyTaskSubs)
+                foreach (var su in dailyTaskSubmit.DailyTaskSubUnits)
                 {
-                    sub.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
-                    await context.DailyTaskSubs.AddAsync(sub);
+                    su.DailyTaskSub.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
+                    await context.DailyTaskSubs.AddAsync(su.DailyTaskSub);
+                    await context.SaveChangesAsync();
+
+                    foreach (var sei in su.DailyTaskSubExtraInfos)
+                    {
+                        sei.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
+                        sei.DailyTaskSubId = su.DailyTaskSub.Id;
+                        await context.DailyTaskSubExtraInfos.AddAsync(sei);
+                    }
                     await context.SaveChangesAsync();
                 }
 
@@ -123,6 +132,12 @@ namespace Dictionary.Utilities
             taskSub.ExtraInfo = src.ExtraInfo;
         }
 
+        public static void CopyFrom(this DailyTaskSubExtraInfo taskSubExtraInfo, DailyTaskSubExtraInfo src)
+        {
+            taskSubExtraInfo.Info = src.Info;
+            taskSubExtraInfo.OrderId = src.OrderId;
+        }
+
         public static async Task<DailyTaskResponse> UpdateDailyTask(this WordDbContext context, DailyTaskSubmit dailyTaskSubmit, ILogger logger)
         {
             DailyTaskResponse dailyTaskResponse = new DailyTaskResponse();
@@ -135,33 +150,77 @@ namespace Dictionary.Utilities
                     dailyTask.CopyFrom(dailyTaskSubmit.DailyTask);
                     await context.SaveChangesAsync();
 
-                    foreach (var sub in dailyTaskSubmit.DailyTaskSubs)
+                    foreach (var su in dailyTaskSubmit.DailyTaskSubUnits)
                     {
-                        if (sub.Id > 0)
+                        if (su.DailyTaskSub.Id > 0)
                         {
                             // Edited subs
-                            var dailyTaskSub = context.DailyTaskSubs.FirstOrDefault(s => s.Id == sub.Id);
+                            var dailyTaskSub = context.DailyTaskSubs.FirstOrDefault(s => s.Id == su.DailyTaskSub.Id);
                             if (dailyTaskSub != null)
                             {
-                                dailyTaskSub.CopyFrom(sub);
+                                dailyTaskSub.CopyFrom(su.DailyTaskSub);
+                                await context.SaveChangesAsync();
+
+                                foreach (var sei in su.DailyTaskSubExtraInfos)
+                                {
+                                    if (sei.Id > 0)
+                                    {
+                                        // Edited extra info
+                                        var dailyTaskSubExtraInfo = context.DailyTaskSubExtraInfos.FirstOrDefault(ei => ei.Id == sei.Id);
+                                        if (dailyTaskSubExtraInfo != null)
+                                        {
+                                            dailyTaskSubExtraInfo.CopyFrom(sei);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        sei.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
+                                        sei.DailyTaskSubId = su.DailyTaskSub.Id;
+                                        await context.DailyTaskSubExtraInfos.AddAsync(sei);
+                                    }
+                                }
                                 await context.SaveChangesAsync();
                             }
                         }
                         else
                         {
                             // New subs
-                            sub.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
-                            await context.DailyTaskSubs.AddAsync(sub);
+                            su.DailyTaskSub.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
+                            await context.DailyTaskSubs.AddAsync(su.DailyTaskSub);
+                            await context.SaveChangesAsync();
+
+                            foreach (var sei in su.DailyTaskSubExtraInfos)
+                            {
+                                sei.DailyTaskId = dailyTaskSubmit.DailyTask.Id;
+                                sei.DailyTaskSubId = su.DailyTaskSub.Id;
+                                await context.DailyTaskSubExtraInfos.AddAsync(sei);
+                            }
                             await context.SaveChangesAsync();
                         }
                     }
 
                     // Deleted subs
                     var newAllSubs = context.DailyTaskSubs.Where(s => s.DailyTaskId == dailyTask.Id).ToList();
-                    var toDelete = newAllSubs.Where(s => !dailyTaskSubmit.DailyTaskSubs.Any(s2 => s2.DailyTaskId == dailyTask.Id && s2.Id == s.Id));
+                    var toDelete = newAllSubs.Where(s => !dailyTaskSubmit.DailyTaskSubUnits.Any(s2 => s2.DailyTaskSub.DailyTaskId == dailyTask.Id &&
+                        s2.DailyTaskSub.Id == s.Id));
                     if (toDelete.Count() > 0)
                     {
                         context.DailyTaskSubs.RemoveRange(toDelete);
+                        await context.SaveChangesAsync();
+                    }
+
+                    //Deleted subextrainfos
+                    List<DailyTaskSubExtraInfo> validSEIs = new List<DailyTaskSubExtraInfo>();
+                    foreach (var tsu in dailyTaskSubmit.DailyTaskSubUnits)
+                    {
+                        validSEIs.AddRange(tsu.DailyTaskSubExtraInfos);
+                    }
+                    var newAllSubExtraInfos = context.DailyTaskSubExtraInfos.Where(sei => sei.DailyTaskId == dailyTask.Id).ToList();
+                    var toDeleteSEIs = newAllSubExtraInfos.Where(s => !validSEIs.Any(s2 => s2.DailyTaskId == s.DailyTaskId &&
+                        s2.DailyTaskSubId == s.DailyTaskSubId && s2.Id == s.Id));
+                    if (toDeleteSEIs.Count() > 0)
+                    {
+                        context.DailyTaskSubExtraInfos.RemoveRange(toDeleteSEIs);
                         await context.SaveChangesAsync();
                     }
                 }

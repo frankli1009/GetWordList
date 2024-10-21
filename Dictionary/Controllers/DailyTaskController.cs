@@ -202,6 +202,7 @@ namespace Dictionary.Controllers
         [HttpGet("gettasksubs/{taskid}")]
         public ActionResult GetDailyTaskSub(int taskId)
         {
+            List<DailyTaskSubUnit> sus = new List<DailyTaskSubUnit>();
             List<DailyTaskSub> s = _context.DailyTaskSubs.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.OrderId).ToList();
             if (s == null)
             {
@@ -209,7 +210,17 @@ namespace Dictionary.Controllers
             }
             else
             {
-                return new OkObjectResult(s);
+                foreach (var s1 in s)
+                {
+                    DailyTaskSubUnit su = new DailyTaskSubUnit() { DailyTaskSub = s1 };
+                    List<DailyTaskSubExtraInfo> sei = _context.DailyTaskSubExtraInfos
+                        .Where(ei => ei.DailyTaskId == taskId && ei.DailyTaskSubId == s1.Id)
+                        .OrderBy(ei => ei.OrderId)
+                        .ToList();
+                    su.DailyTaskSubExtraInfos.AddRange(sei);
+                    sus.Add(su);
+                }
+                return new OkObjectResult(sus);
             }
         }
 
