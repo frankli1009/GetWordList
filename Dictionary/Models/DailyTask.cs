@@ -22,6 +22,8 @@ namespace Dictionary.Models
 
         public int DailyTaskTypeId { get; set; }
         public virtual DailyTaskType DailyTaskType { get; set; }
+        public int DailyTaskThemeId { get; set; }
+        public virtual DailyTaskTheme DailyTaskTheme { get; set; }
     }
 }
 

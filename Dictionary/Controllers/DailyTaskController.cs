@@ -26,7 +26,7 @@ namespace Dictionary.Controllers
         }
 
         [HttpGet("types")]
-        public ActionResult GetDailyTaskType()
+        public ActionResult GetDailyTaskTypes()
         {
             List<DailyTaskType> s = _context.DailyTaskTypes.ToList();
             if (s == null)
@@ -39,8 +39,22 @@ namespace Dictionary.Controllers
             }
         }
 
+        [HttpGet("themes")]
+        public ActionResult GetDailyTaskThemes()
+        {
+            List<DailyTaskTheme> s = _context.DailyTaskThemes.ToList();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                return new OkObjectResult(s);
+            }
+        }
+
         [HttpGet("statuses")]
-        public ActionResult GetDailyTaskStatus()
+        public ActionResult GetDailyTaskStatuses()
         {
             List<DailyTaskStatus> s = _context.DailyTaskStatuses.ToList();
             if (s == null)
@@ -200,7 +214,7 @@ namespace Dictionary.Controllers
         }
 
         [HttpGet("gettasksubs/{taskid}")]
-        public ActionResult GetDailyTaskSub(int taskId)
+        public ActionResult GetDailyTaskSubs(int taskId)
         {
             List<DailyTaskSubUnit> sus = new List<DailyTaskSubUnit>();
             List<DailyTaskSub> s = _context.DailyTaskSubs.Where(t => t.DailyTaskId == taskId).OrderBy(t => t.OrderId).ToList();
