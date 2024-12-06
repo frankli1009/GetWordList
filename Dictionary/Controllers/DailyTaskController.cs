@@ -127,28 +127,46 @@ namespace Dictionary.Controllers
             }
         }
 
-        [HttpGet("gettaskshist/{datetype}/{startdate}/{enddate}")]
-        public ActionResult GetDailyTasksHist(int dateType, string startDate, string endDate)
+        [HttpGet("gettaskshist")]
+        public ActionResult GetDailyTasksHist(QueryConds queryConds)
         {
-            DateTime start = DateTime.Parse(startDate);
-            DateTime end = DateTime.Parse(endDate).AddDays(1);
-            List<DailyTask> s;
-            if (dateType == 1) // StartDate
+            List<DailyTask> s = null;
+            if (queryConds.QueryType == (int)QueryType.ByDate)
             {
-                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate < end && d.StartDate >= start)
-                .OrderBy(d => d.Id)
+                int dateType = Int32.Parse(queryConds.QueryParams[0]);
+                DateTime start = DateTime.Parse(queryConds.QueryParams[1]);
+                DateTime end = DateTime.Parse(queryConds.QueryParams[2]).AddDays(1);
+                if (dateType == (int)QueryDateType.ByStartDate) // StartDate
+                {
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate < end && d.StartDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else if (dateType == (int)QueryDateType.ByEndDate) // EndDate
+                {
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.EndDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else // StartDate >= EndDate <=
+                {
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.StartDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+            }
+            else if (queryConds.QueryType == (int)QueryType.ById)
+            {
+                int taskId = Int32.Parse(queryConds.QueryParams[0]);
+                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Id == taskId)
+                .OrderByDescending(d => d.Id)
                 .ToList();
             }
-            else if (dateType == 2) // EndDate
+            else if (queryConds.QueryType == (int)QueryType.ByName)
             {
-                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.EndDate >= start)
-                .OrderBy(d => d.Id)
-                .ToList();
-            }
-            else // StartDate >= EndDate <=
-            {
-                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.StartDate >= start)
-                .OrderBy(d => d.Id)
+                string taskName = queryConds.QueryParams[0];
+                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Name.IndexOf(taskName) > -1)
+                .OrderByDescending(d => d.Id)
                 .ToList();
             }
             if (s == null)
@@ -161,28 +179,46 @@ namespace Dictionary.Controllers
             }
         }
 
-        [HttpGet("gettasks/{datetype}/{startdate}/{enddate}")]
-        public ActionResult GetDailyTasks(int dateType, string startDate, string endDate)
+        [HttpGet("gettasks")]
+        public ActionResult GetDailyTasks(QueryConds queryConds)
         {
-            DateTime start = DateTime.Parse(startDate);
-            DateTime end = DateTime.Parse(endDate).AddDays(1);
-            List<DailyTask> s;
-            if (dateType == 1) // StartDate
+            List<DailyTask> s = null;
+            if (queryConds.QueryType == (int)QueryType.ByDate)
             {
-                s = _context.DailyTasks.Where(d => d.StartDate < end && d.StartDate >= start)
-                .OrderBy(d => d.Id)
+                int dateType = Int32.Parse(queryConds.QueryParams[0]);
+                DateTime start = DateTime.Parse(queryConds.QueryParams[1]);
+                DateTime end = DateTime.Parse(queryConds.QueryParams[2]).AddDays(1);
+                if (dateType == (int)QueryDateType.ByStartDate) // StartDate
+                {
+                    s = _context.DailyTasks.Where(d => d.StartDate < end && d.StartDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else if (dateType == (int)QueryDateType.ByEndDate) // EndDate
+                {
+                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else // StartDate >= EndDate <=
+                {
+                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.StartDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+            }
+            else if (queryConds.QueryType == (int)QueryType.ById)
+            {
+                int taskId = Int32.Parse(queryConds.QueryParams[0]);
+                s = _context.DailyTasks.Where(d => d.Id == taskId)
+                .OrderByDescending(d => d.Id)
                 .ToList();
             }
-            else if (dateType == 2) // EndDate
+            else if (queryConds.QueryType == (int)QueryType.ByName)
             {
-                s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start)
-                .OrderBy(d => d.Id)
-                .ToList();
-            }
-            else // StartDate >= EndDate <=
-            {
-                s = _context.DailyTasks.Where(d => d.EndDate < end && d.StartDate >= start)
-                .OrderBy(d => d.Id)
+                string taskName = queryConds.QueryParams[0];
+                s = _context.DailyTasks.Where(d => d.Name.IndexOf(taskName) > -1)
+                .OrderByDescending(d => d.Id)
                 .ToList();
             }
             if (s == null)
