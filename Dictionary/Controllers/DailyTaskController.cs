@@ -148,6 +148,18 @@ namespace Dictionary.Controllers
                     .OrderByDescending(d => d.Id)
                     .ToList();
                 }
+                else if (dateType == (int)QueryDateType.ByCreateTime) // Time
+                {
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Time < end && d.Time >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else if (dateType == (int)QueryDateType.ByDoneTime) // DoneTime
+                {
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.DoneTime < end && d.DoneTime >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
                 else // StartDate >= EndDate <=
                 {
                     s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.StartDate >= start)
@@ -197,6 +209,18 @@ namespace Dictionary.Controllers
                 else if (dateType == (int)QueryDateType.ByEndDate) // EndDate
                 {
                     s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else if (dateType == (int)QueryDateType.ByCreateTime) // Time
+                {
+                    s = _context.DailyTasks.Where(d => d.Time < end && d.Time >= start)
+                    .OrderByDescending(d => d.Id)
+                    .ToList();
+                }
+                else if (dateType == (int)QueryDateType.ByDoneTime) // DoneTime
+                {
+                    s = _context.DailyTasks.Where(d => d.DoneTime < end && d.DoneTime >= start)
                     .OrderByDescending(d => d.Id)
                     .ToList();
                 }

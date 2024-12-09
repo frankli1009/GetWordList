@@ -19,6 +19,7 @@ namespace Dictionary.Models
         public int DailyTaskStatusId { get; set; }
         public int DoneLeastWorkload { get; set; }
         public int Suspended { get; set; }
+        public DateTime? DoneTime { get; set; }
 
         public int DailyTaskTypeId { get; set; }
         public virtual DailyTaskType DailyTaskType { get; set; }

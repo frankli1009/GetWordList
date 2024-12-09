@@ -36,6 +36,8 @@ namespace Dictionary.Models
 		ByStartDate = 1,
 		ByEndDate = 2,
 		ByBothStartAndEndDate = 3,
-	}
+        ByCreateTime = 4,
+        ByDoneTime = 5
+    }
 }
 
