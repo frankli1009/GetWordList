@@ -158,6 +158,10 @@ namespace Dictionary.Utilities
                             var dailyTaskSub = context.DailyTaskSubs.FirstOrDefault(s => s.Id == su.DailyTaskSub.Id);
                             if (dailyTaskSub != null)
                             {
+                                if (dailyTaskSub.DailyTaskId != dailyTask.Id)
+                                {
+                                    throw new Exception($"ABNORMALLY try to update sub task [DailyTaskId: {dailyTask.Id}, Id: {dailyTaskSub.Id}, Info: {su.DailyTaskSub.Info}] from sub task [DailyTaskId: {dailyTaskSub.DailyTaskId}, Info: {dailyTaskSub.Info}]");
+                                }
                                 dailyTaskSub.CopyFrom(su.DailyTaskSub);
                                 await context.SaveChangesAsync();
 

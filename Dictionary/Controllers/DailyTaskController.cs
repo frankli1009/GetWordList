@@ -102,9 +102,10 @@ namespace Dictionary.Controllers
         {
             string sql = "Select * from DailyTasks where " +
                 "((DailyTaskTypeId in (1, 2) and Id in (" +
-                "select DailyTaskId from DailyTaskSchedules where Id in (" +
-                "select DailyTaskScheduleId from DailyTaskScheduleDetails where " +
-                "DailyTaskStatusId < 3) and ActDate<Convert(DateTime, '" +
+                "select DailyTaskId from DailyTaskSchedules where Id in ("+
+                "select a.DailyTaskScheduleId from DailyTaskScheduleDetails a,  "+
+                "DailyTaskSubs b where a.DailyTaskStatusId<3 and b.Optional=0 "+
+                "and a.DailyTaskSubId=b.Id) and ActDate<Convert(DateTime, '" +
                 DateTime.Now.ToString("yyyy-MM-dd") + "', 20))) " +
                 "or " +
                 "(DailyTaskTypeId = 3 and EndDate<Convert(DateTime, '" +
