@@ -28,7 +28,8 @@ namespace Dictionary.Models
 	{
 		ByDate = 1,
 		ById = 2,
-		ByName = 3
+		ByName = 3,
+		ByCombination = 4
 	}
 
 	public enum QueryDateType

@@ -131,56 +131,50 @@ namespace Dictionary.Controllers
         [HttpGet("gettaskshist")]
         public ActionResult GetDailyTasksHist(QueryConds queryConds)
         {
-            List<DailyTask> s = null;
+            IQueryable<DailyTask> s = null;
+            int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
             if (queryConds.QueryType == (int)QueryType.ByDate)
             {
-                int dateType = Int32.Parse(queryConds.QueryParams[0]);
-                DateTime start = DateTime.Parse(queryConds.QueryParams[1]);
-                DateTime end = DateTime.Parse(queryConds.QueryParams[2]).AddDays(1);
+                int dateType = Int32.Parse(queryConds.QueryParams[1]);
+                DateTime start = DateTime.Parse(queryConds.QueryParams[2]);
+                DateTime end = DateTime.Parse(queryConds.QueryParams[3]).AddDays(1);
                 if (dateType == (int)QueryDateType.ByStartDate) // StartDate
                 {
-                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate < end && d.StartDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate < end && d.StartDate >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByEndDate) // EndDate
                 {
-                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.EndDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.EndDate >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByCreateTime) // Time
                 {
-                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Time < end && d.Time >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Time < end && d.Time >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByDoneTime) // DoneTime
                 {
-                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.DoneTime < end && d.DoneTime >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.DoneTime < end && d.DoneTime >= start);
                 }
                 else // StartDate >= EndDate <=
                 {
-                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.StartDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.EndDate < end && d.StartDate >= start);
                 }
             }
             else if (queryConds.QueryType == (int)QueryType.ById)
             {
-                int taskId = Int32.Parse(queryConds.QueryParams[0]);
-                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Id == taskId)
-                .OrderByDescending(d => d.Id)
-                .ToList();
+                int taskId = Int32.Parse(queryConds.QueryParams[1]);
+                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Id == taskId);
             }
             else if (queryConds.QueryType == (int)QueryType.ByName)
             {
-                string taskName = queryConds.QueryParams[0];
-                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Name.IndexOf(taskName) > -1)
-                .OrderByDescending(d => d.Id)
-                .ToList();
+                string taskName = queryConds.QueryParams[1];
+                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Name.IndexOf(taskName) > -1);
+            }
+            else if (queryConds.QueryType == (int)QueryType.ByCombination)
+            {
+                int taskYear = Int32.Parse(queryConds.QueryParams[1]);
+                string taskName = queryConds.QueryParams[2];
+                s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
+                if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
             }
             if (s == null)
             {
@@ -188,63 +182,60 @@ namespace Dictionary.Controllers
             }
             else
             {
-                return new OkObjectResult(s);
+                if (queryTheme > 0) s = s.Where(t => t.DailyTaskThemeId == queryTheme);
+                List<DailyTask> ls = s.OrderByDescending(d => d.Id).ToList();
+
+                return new OkObjectResult(ls);
             }
         }
 
         [HttpGet("gettasks")]
         public ActionResult GetDailyTasks(QueryConds queryConds)
         {
-            List<DailyTask> s = null;
+            IQueryable<DailyTask> s = null;
+            int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
             if (queryConds.QueryType == (int)QueryType.ByDate)
             {
-                int dateType = Int32.Parse(queryConds.QueryParams[0]);
-                DateTime start = DateTime.Parse(queryConds.QueryParams[1]);
-                DateTime end = DateTime.Parse(queryConds.QueryParams[2]).AddDays(1);
+                int dateType = Int32.Parse(queryConds.QueryParams[1]);
+                DateTime start = DateTime.Parse(queryConds.QueryParams[2]);
+                DateTime end = DateTime.Parse(queryConds.QueryParams[3]).AddDays(1);
                 if (dateType == (int)QueryDateType.ByStartDate) // StartDate
                 {
-                    s = _context.DailyTasks.Where(d => d.StartDate < end && d.StartDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.StartDate < end && d.StartDate >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByEndDate) // EndDate
                 {
-                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.EndDate >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByCreateTime) // Time
                 {
-                    s = _context.DailyTasks.Where(d => d.Time < end && d.Time >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.Time < end && d.Time >= start);
                 }
                 else if (dateType == (int)QueryDateType.ByDoneTime) // DoneTime
                 {
-                    s = _context.DailyTasks.Where(d => d.DoneTime < end && d.DoneTime >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.DoneTime < end && d.DoneTime >= start);
                 }
                 else // StartDate >= EndDate <=
                 {
-                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.StartDate >= start)
-                    .OrderByDescending(d => d.Id)
-                    .ToList();
+                    s = _context.DailyTasks.Where(d => d.EndDate < end && d.StartDate >= start);
                 }
             }
             else if (queryConds.QueryType == (int)QueryType.ById)
             {
-                int taskId = Int32.Parse(queryConds.QueryParams[0]);
-                s = _context.DailyTasks.Where(d => d.Id == taskId)
-                .OrderByDescending(d => d.Id)
-                .ToList();
+                int taskId = Int32.Parse(queryConds.QueryParams[1]);
+                s = _context.DailyTasks.Where(d => d.Id == taskId);
             }
             else if (queryConds.QueryType == (int)QueryType.ByName)
             {
-                string taskName = queryConds.QueryParams[0];
-                s = _context.DailyTasks.Where(d => d.Name.IndexOf(taskName) > -1)
-                .OrderByDescending(d => d.Id)
-                .ToList();
+                string taskName = queryConds.QueryParams[1];
+                s = _context.DailyTasks.Where(d => d.Name.IndexOf(taskName) > -1);
+            }
+            else if (queryConds.QueryType == (int)QueryType.ByCombination)
+            {
+                int taskYear = Int32.Parse(queryConds.QueryParams[1]);
+                string taskName = queryConds.QueryParams[2];
+                s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
+                if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
             }
             if (s == null)
             {
@@ -252,7 +243,10 @@ namespace Dictionary.Controllers
             }
             else
             {
-                return new OkObjectResult(s);
+                if (queryTheme > 0) s = s.Where(t => t.DailyTaskThemeId == queryTheme);
+                List<DailyTask> ls = s.OrderByDescending(d => d.Id).ToList();
+
+                return new OkObjectResult(ls);
             }
         }
 
