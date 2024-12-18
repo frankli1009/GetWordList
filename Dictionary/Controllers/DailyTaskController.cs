@@ -129,10 +129,9 @@ namespace Dictionary.Controllers
         }
 
         [HttpGet("gettaskshist")]
-        public ActionResult GetDailyTasksHist(QueryConds queryConds)
+        public async Task<ActionResult> GetDailyTasksHist(QueryConds queryConds)
         {
             IQueryable<DailyTask> s = null;
-            int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
             if (queryConds.QueryType == (int)QueryType.ByDate)
             {
                 int dateType = Int32.Parse(queryConds.QueryParams[1]);
@@ -176,6 +175,34 @@ namespace Dictionary.Controllers
                 s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
                 if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
             }
+
+            return await GetQueryResult(queryConds, s, true);
+        }
+
+        private async Task<T> GetParameter<T>(string category, string key, T defaultValue)
+        {
+
+            ToolKeyParam tkpCountPerPage = await _context.GetToolKeyParam(category, key);
+            if (tkpCountPerPage != null)
+            {
+                try
+                {
+                    return (T)Convert.ChangeType(tkpCountPerPage.Parameters, typeof(T)); ;
+                }
+                catch
+                {
+                    return defaultValue;
+                }
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        private async Task<ActionResult> GetQueryResult(QueryConds queryConds, IQueryable<DailyTask> s, bool historyQuery)
+        {
+            int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
             if (s == null)
             {
                 return new NotFoundResult();
@@ -183,14 +210,82 @@ namespace Dictionary.Controllers
             else
             {
                 if (queryTheme > 0) s = s.Where(t => t.DailyTaskThemeId == queryTheme);
-                List<DailyTask> ls = s.OrderByDescending(d => d.Id).ToList();
+                int totalCount = s.Count();
+                if (totalCount > 0)
+                {
+                    int countPerPage = await GetParameter<int>("DailyTask",
+                        historyQuery ? "History.CountPerPage" : "Management.CountPerPage",
+                        20);
 
-                return new OkObjectResult(ls);
+                    PageInfo pageInfo = new()
+                    {
+                        CountPerPage = countPerPage,
+                        CurrentPage = queryConds.QueryPage,
+                        TotalCount = totalCount,
+                        TotalPageCount = totalCount / countPerPage + (totalCount % countPerPage == 0 ? 0 : 1)
+                    };
+                    List<DailyTask> ls;
+                    s = s.OrderByDescending(d => d.Id);
+
+                    int minimumCountToSplitIntoPages = await GetParameter<int>("DailyTask",
+                        historyQuery ? "History.MinimumCountToSplitIntoPages" : "Management.MinimumCountToSplitIntoPages",
+                        30); 
+                    if (totalCount > minimumCountToSplitIntoPages)
+                    {
+                        if (totalCount > countPerPage * (queryConds.QueryPage - 1))
+                        {
+                            if (totalCount <= countPerPage * queryConds.QueryPage)
+                            {
+                                s = s.Skip(countPerPage * (queryConds.QueryPage - 1));
+                            }
+                            else
+                            {
+                                s = s.Skip(countPerPage * (queryConds.QueryPage - 1)).Take(countPerPage);
+                            }
+                            if (queryConds.QueryPage > 1)
+                            {
+                                pageInfo.FirstPage = true;
+                                pageInfo.PrevPage = true;
+                                pageInfo.Prev1Page = queryConds.QueryPage - 1;
+                            }
+                            if (queryConds.QueryPage > 2) pageInfo.Prev2Page = queryConds.QueryPage - 2;
+                            if (queryConds.QueryPage + 1 <= pageInfo.TotalPageCount)
+                            {
+                                pageInfo.NextPage = true;
+                                pageInfo.LastPage = true;
+                                pageInfo.Next1Page = queryConds.QueryPage + 1;
+                            }
+                            if (queryConds.QueryPage + 2 <= pageInfo.TotalPageCount) pageInfo.Next2Page = queryConds.QueryPage + 2;
+                        }
+                        else
+                        {
+                            return new NotFoundResult();
+                        }
+                    }
+                    else
+                    {
+                        pageInfo.CountPerPage = minimumCountToSplitIntoPages;
+                        pageInfo.TotalPageCount = 1;
+                    }
+                    ls = s.ToList();
+                    PageData<DailyTask> pageData = new()
+                    {
+                        Page = pageInfo,
+                        Data = ls
+                    };
+
+                    return new OkObjectResult(pageData);
+                }
+                else
+                {
+                    return new NotFoundResult();
+                }
             }
+
         }
 
         [HttpGet("gettasks")]
-        public ActionResult GetDailyTasks(QueryConds queryConds)
+        public async Task<ActionResult> GetDailyTasks(QueryConds queryConds)
         {
             IQueryable<DailyTask> s = null;
             int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
@@ -237,17 +332,7 @@ namespace Dictionary.Controllers
                 s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
                 if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
             }
-            if (s == null)
-            {
-                return new NotFoundResult();
-            }
-            else
-            {
-                if (queryTheme > 0) s = s.Where(t => t.DailyTaskThemeId == queryTheme);
-                List<DailyTask> ls = s.OrderByDescending(d => d.Id).ToList();
-
-                return new OkObjectResult(ls);
-            }
+            return await GetQueryResult(queryConds, s, false);
         }
 
         [HttpGet("getmoretaskstoday")]

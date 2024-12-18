@@ -22,6 +22,7 @@ namespace Dictionary.Models
 				_QueryParams.AddRange(value);
 			}
 		}
+		public int QueryPage { get; set; }
 	}
 
 	public enum QueryType
