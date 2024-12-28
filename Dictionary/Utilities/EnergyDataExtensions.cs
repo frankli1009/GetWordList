@@ -58,7 +58,7 @@ namespace Dictionary.Utilities
                 startTime = new DateTime(startYear, startMonth, day);
             }
             return context.ConsumerGoodsDetails
-                .Where<ConsumerGoodsDetail>(s =>s.ConsumerGoodsId == energyTypeId && s.Time > startTime && s.Time < endTime)
+                .Where<ConsumerGoodsDetail>(s =>s.ConsumerGoodsId == energyTypeId && s.Time >= startTime && s.Time < endTime)
                 .OrderBy(s => s.Time)
                 .ToList<ConsumerGoodsDetail>();
         }
