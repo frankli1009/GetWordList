@@ -167,13 +167,23 @@ namespace Dictionary.Controllers
             {
                 string taskName = queryConds.QueryParams[1];
                 s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.Name.IndexOf(taskName) > -1);
+
+                var s1 = from t1 in _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3)
+                         from t2 in _context.DailyTaskSubs.Where(sub => sub.DailyTaskId == t1.Id && sub.Info.IndexOf(taskName) > -1)
+                         select t1;
+                s = s.Concat(s1).Distinct();
             }
             else if (queryConds.QueryType == (int)QueryType.ByCombination)
             {
                 int taskYear = Int32.Parse(queryConds.QueryParams[1]);
                 string taskName = queryConds.QueryParams[2];
-                s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
+                s = _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
                 if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
+
+                var s1 = from t1 in _context.DailyTasks.Where(d => d.DailyTaskStatusId == 3 && d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear)
+                         from t2 in _context.DailyTaskSubs.Where(sub => sub.DailyTaskId == t1.Id && sub.Info.IndexOf(taskName) > -1)
+                         select t1;
+                s = s.Concat(s1).Distinct();
             }
 
             return await GetQueryResult(queryConds, s, true);
@@ -324,6 +334,11 @@ namespace Dictionary.Controllers
             {
                 string taskName = queryConds.QueryParams[1];
                 s = _context.DailyTasks.Where(d => d.Name.IndexOf(taskName) > -1);
+
+                var s1 = from t1 in _context.DailyTasks
+                         from t2 in _context.DailyTaskSubs.Where(sub => sub.DailyTaskId == t1.Id && sub.Info.IndexOf(taskName) > -1)
+                         select t1;
+                s = s.Concat(s1).Distinct();
             }
             else if (queryConds.QueryType == (int)QueryType.ByCombination)
             {
@@ -331,6 +346,11 @@ namespace Dictionary.Controllers
                 string taskName = queryConds.QueryParams[2];
                 s = _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear);
                 if (!string.IsNullOrWhiteSpace(taskName)) s = s.Where(d => d.Name.IndexOf(taskName) > -1);
+
+                var s1 = from t1 in _context.DailyTasks.Where(d => d.StartDate.Year <= taskYear && d.EndDate.Year >= taskYear)
+                         from t2 in _context.DailyTaskSubs.Where(sub => sub.DailyTaskId == t1.Id && sub.Info.IndexOf(taskName) > -1)
+                         select t1;
+                s = s.Concat(s1).Distinct();
             }
             return await GetQueryResult(queryConds, s, false);
         }
