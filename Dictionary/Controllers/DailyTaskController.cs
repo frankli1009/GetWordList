@@ -645,6 +645,24 @@ namespace Dictionary.Controllers
                 return new OkObjectResult(s);
             }
         }
+
+        [HttpPut("refreshtaskstatus/{taskid}")]
+        public async Task<ActionResult> RefreshTaskStatus(int taskId)
+        {
+            DailyTask s = _context.DailyTasks.Where(t => t.Id == taskId).FirstOrDefault();
+            if (s == null)
+            {
+                return new NotFoundResult();
+            }
+            else
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC spUpdateTaskStatus " + s.Id + "," + s.DailyTaskTypeId.ToString() +
+                        "," + s.DoneLeastWorkload.ToString());
+
+                return new OkResult();
+            }
+        }
     }
 }
 
