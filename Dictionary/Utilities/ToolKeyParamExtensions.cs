@@ -99,6 +99,28 @@ namespace Dictionary.Utilities
             }
             return or;
         }
+
+        public static async Task<T> GetParameter<T>(this WordDbContext context, string category, string key, T defaultValue)
+        {
+
+            ToolKeyParam tkpCountPerPage = await context.GetToolKeyParam(category, key);
+            if (tkpCountPerPage != null)
+            {
+                try
+                {
+                    return (T)Convert.ChangeType(tkpCountPerPage.Parameters, typeof(T)); ;
+                }
+                catch
+                {
+                    return defaultValue;
+                }
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
     }
 }
 

@@ -23,5 +23,6 @@ namespace Dictionary.Utilities
             Regex rgx = new Regex(extraRegex);
             return source.Where(s => rgx.IsMatch(s));
         }
+
     }
 }

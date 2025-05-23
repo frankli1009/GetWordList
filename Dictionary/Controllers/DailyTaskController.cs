@@ -16,10 +16,10 @@ namespace Dictionary.Controllers
     [Route("dailytask")]
     public class DailyTaskController : Controller
     {
-        private readonly ILogger<EnergyDataController> _logger;
+        private readonly ILogger<DailyTaskController> _logger;
         private readonly WordDbContext _context;
 
-        public DailyTaskController(WordDbContext context, ILogger<EnergyDataController> logger)
+        public DailyTaskController(WordDbContext context, ILogger<DailyTaskController> logger)
         {
             _context = context;
             _logger = logger;
@@ -189,27 +189,6 @@ namespace Dictionary.Controllers
             return await GetQueryResult(queryConds, s, true);
         }
 
-        private async Task<T> GetParameter<T>(string category, string key, T defaultValue)
-        {
-
-            ToolKeyParam tkpCountPerPage = await _context.GetToolKeyParam(category, key);
-            if (tkpCountPerPage != null)
-            {
-                try
-                {
-                    return (T)Convert.ChangeType(tkpCountPerPage.Parameters, typeof(T)); ;
-                }
-                catch
-                {
-                    return defaultValue;
-                }
-            }
-            else
-            {
-                return defaultValue;
-            }
-        }
-
         private async Task<ActionResult> GetQueryResult(QueryConds queryConds, IQueryable<DailyTask> s, bool historyQuery)
         {
             int queryTheme = Int32.Parse(queryConds.QueryParams[0]);
@@ -223,7 +202,7 @@ namespace Dictionary.Controllers
                 int totalCount = s.Count();
                 if (totalCount > 0)
                 {
-                    int countPerPage = await GetParameter<int>("DailyTask",
+                    int countPerPage = await _context.GetParameter<int>("DailyTask",
                         historyQuery ? "History.CountPerPage" : "Management.CountPerPage",
                         20);
 
@@ -237,7 +216,7 @@ namespace Dictionary.Controllers
                     List<DailyTask> ls;
                     s = s.OrderByDescending(d => d.Id);
 
-                    int minimumCountToSplitIntoPages = await GetParameter<int>("DailyTask",
+                    int minimumCountToSplitIntoPages = await _context.GetParameter<int>("DailyTask",
                         historyQuery ? "History.MinimumCountToSplitIntoPages" : "Management.MinimumCountToSplitIntoPages",
                         30); 
                     if (totalCount > minimumCountToSplitIntoPages)

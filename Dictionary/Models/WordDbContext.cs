@@ -38,6 +38,8 @@ namespace Dictionary.Models
         public DbSet<ToolKeyParam> ToolKeyParams { get; set; }
         public DbSet<OpLog> OpLogs { get; set; }
         public DbSet<OpLogLevel> OpLogLevels { get; set; }
+        public DbSet<Delivery> Deliveries { get; set; }
+        public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
     }
 
 }
