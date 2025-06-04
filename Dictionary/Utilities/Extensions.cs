@@ -24,5 +24,9 @@ namespace Dictionary.Utilities
             return source.Where(s => rgx.IsMatch(s));
         }
 
+        public static object GetPropertyValue(this object obj, string propertyName)
+        {
+            return obj.GetType().GetProperty(propertyName).GetValue(obj, null);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Reflection;
 using Dictionary.Models;
 using Dictionary.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -54,18 +55,30 @@ namespace Dictionary.Controllers
         }
 
         [HttpGet("getdeliverieson")]
-        public ActionResult GetDeliveriesOn()
+        public ActionResult GetDeliveriesOn(int orderType=0, string orderField="")
         {
-            var s = _context.Deliveries.Where(d => d.StatusId < 4)
-                .OrderBy(d => d.Id)
-                .ToList();
-            if (s == null)
+            List<Delivery> ls;
+            var s = _context.Deliveries.Where(d => d.StatusId < 4).AsEnumerable();
+            if (orderType == (int)ResultOrderType.None || string.IsNullOrWhiteSpace(orderField))
+            {
+                ls = s.OrderByDescending(d => d.Id).ToList();
+            }
+            else if (orderType == (int)ResultOrderType.Ascending)
+            {
+                ls = s.OrderBy(d => d.GetPropertyValue(orderField)).ToList();
+            }
+            else
+            {
+                ls = s.OrderByDescending(d => d.GetPropertyValue(orderField)).ToList();
+            }
+                
+            if (ls == null)
             {
                 return new NotFoundResult();
             }
             else
             {
-                return new OkObjectResult(s);
+                return new OkObjectResult(ls);
             }
         }
 
@@ -133,6 +146,23 @@ namespace Dictionary.Controllers
                 int totalCount = s.Count();
                 if (totalCount > 0)
                 {
+                    var se = s.AsEnumerable();
+                    if (!string.IsNullOrWhiteSpace(queryConds.OrderField))
+                    {
+                        if (queryConds.OrderType == (int)ResultOrderType.Ascending)
+                        {
+                            se = se.OrderBy(t => t.GetPropertyValue(queryConds.OrderField));
+                        }
+                        else if (queryConds.OrderType == (int)ResultOrderType.Descending)
+                        {
+                            se = se.OrderByDescending(t => t.GetPropertyValue(queryConds.OrderField));
+                        }
+                    }
+                    else
+                    {
+                        se = se.OrderByDescending(t => t.Id);
+                    }
+
                     int countPerPage = await _context.GetParameter<int>("Delivery",
                         "CountPerPage", 20);
 
@@ -143,8 +173,6 @@ namespace Dictionary.Controllers
                         TotalCount = totalCount,
                         TotalPageCount = totalCount / countPerPage + (totalCount % countPerPage == 0 ? 0 : 1)
                     };
-                    List<Delivery> ls;
-                    s = s.OrderByDescending(d => d.Id);
 
                     int minimumCountToSplitIntoPages = await _context.GetParameter<int>("Delivery",
                         "MinimumCountToSplitIntoPages", 30);
@@ -154,11 +182,11 @@ namespace Dictionary.Controllers
                         {
                             if (totalCount <= countPerPage * queryConds.QueryPage)
                             {
-                                s = s.Skip(countPerPage * (queryConds.QueryPage - 1));
+                                se = se.Skip(countPerPage * (queryConds.QueryPage - 1));
                             }
                             else
                             {
-                                s = s.Skip(countPerPage * (queryConds.QueryPage - 1)).Take(countPerPage);
+                                se = se.Skip(countPerPage * (queryConds.QueryPage - 1)).Take(countPerPage);
                             }
                             if (queryConds.QueryPage > 1)
                             {
@@ -185,7 +213,7 @@ namespace Dictionary.Controllers
                         pageInfo.CountPerPage = minimumCountToSplitIntoPages;
                         pageInfo.TotalPageCount = 1;
                     }
-                    ls = s.ToList();
+                    List<Delivery> ls = se.ToList();
                     PageData<Delivery> pageData = new()
                     {
                         Page = pageInfo,

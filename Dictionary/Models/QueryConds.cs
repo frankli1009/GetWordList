@@ -8,6 +8,7 @@ namespace Dictionary.Models
 		public QueryConds()
 		{
 			_QueryParams = new List<string>();
+			OrderType = (int)ResultOrderType.None;
 		}
 
 		private List<string> _QueryParams;
@@ -23,9 +24,12 @@ namespace Dictionary.Models
 			}
 		}
 		public int QueryPage { get; set; }
-	}
 
-	public enum QueryType
+		public int OrderType { get; set; } = 0;
+		public string OrderField { get; set; } = "";
+    }
+
+    public enum QueryType
 	{
 		ByDate = 1,
 		ById = 2,
@@ -41,5 +45,12 @@ namespace Dictionary.Models
         ByCreateTime = 4,
         ByDoneTime = 5
     }
+
+	public enum ResultOrderType
+	{
+		None = 0,
+		Ascending = 1,
+		Descending = 2
+	}
 }
 
