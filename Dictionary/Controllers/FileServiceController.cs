@@ -434,8 +434,8 @@ namespace Dictionary.Controllers
 
         }
 
-        [HttpGet("get/{id}/{uId}/{fId}")]
-        public IActionResult GetFile(int id, string uId, int fId)
+        [HttpGet("getstream/{id}/{uId}/{fId}")]
+        public IActionResult GetFileStream(int id, string uId, int fId)
         {
             var file = _context.ServiceFiles.FirstOrDefault(sf => sf.Id == id && sf.UId == uId);
             if (file == null) return NotFound();
@@ -461,6 +461,18 @@ namespace Dictionary.Controllers
             }
 
             //return File(file.FileData, file.FileType, file.FileName); // 设置正确的MIME类型和文件名
+        }
+
+        [HttpGet("get/{id}/{uId}/{fId}")]
+        public IActionResult GetFile(int id, string uId, int fId)
+        {
+            var file = _context.ServiceFiles.FirstOrDefault(sf => sf.Id == id && sf.UId == uId);
+            if (file == null) return NotFound();
+
+            var fileData = _context.ServiceFileDatas.FirstOrDefault(fd => fd.Id == fId && fd.ServiceFileId == id);
+            if (fileData == null) return NotFound();
+
+            return File(fileData.FileData, fileData.FileType, fileData.FileName);
         }
 
         [HttpPut("update")]
