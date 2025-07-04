@@ -40,6 +40,9 @@ namespace Dictionary.Models
         public DbSet<OpLogLevel> OpLogLevels { get; set; }
         public DbSet<Delivery> Deliveries { get; set; }
         public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
+        public DbSet<ServiceFile> ServiceFiles { get; set; }
+        public DbSet<ServiceFileData> ServiceFileDatas { get; set; }
+        public DbSet<ServiceFileStatus> ServiceFileStatuses { get; set; }
     }
 
 }

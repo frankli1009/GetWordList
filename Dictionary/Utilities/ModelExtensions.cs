@@ -44,6 +44,6 @@ namespace Dictionary.Utilities
 
 			return delivery;
 		}
-	}
+    }
 }
 

@@ -4,14 +4,16 @@ using Dictionary.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dictionary.Migrations
 {
     [DbContext(typeof(WordDbContext))]
-    partial class WordDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250609083729_AddServiceFile")]
+    partial class AddServiceFile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,6 +490,15 @@ namespace Dictionary.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("varchar(254)");
 
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("FileType")
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("ServiceKey")
                         .HasColumnType("varchar(254)");
 
@@ -506,38 +517,12 @@ namespace Dictionary.Migrations
                     b.Property<string>("UId")
                         .HasColumnType("varchar(64)");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceFiles");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ServiceFileData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<byte[]>("FileData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<string>("FileType")
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ServiceFileId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UploadTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceFileId");
-
-                    b.ToTable("ServiceFileDatas");
+                    b.ToTable("ServiceFiles");
                 });
 
             modelBuilder.Entity("Dictionary.Models.ServiceFileStatus", b =>
@@ -795,17 +780,6 @@ namespace Dictionary.Migrations
                         .IsRequired();
 
                     b.Navigation("OpLogLevel");
-                });
-
-            modelBuilder.Entity("Dictionary.Models.ServiceFileData", b =>
-                {
-                    b.HasOne("Dictionary.Models.ServiceFile", "ServiceFile")
-                        .WithMany()
-                        .HasForeignKey("ServiceFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ServiceFile");
                 });
 
             modelBuilder.Entity("Dictionary.Models.Sudoku", b =>
